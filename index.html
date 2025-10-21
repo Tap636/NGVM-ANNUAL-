@@ -12,8 +12,9 @@
 body { -webkit-print-color-adjust: exact; }
 .no-print { display: none !important; }
 .screen-only { display: none !important; }
-.print-only { display: block !important; } 
+.print-only { display: block !important; } /* Attendance box visibility */
 
+/* AGGRESSIVE PADDING REDUCTION (Fixes 2-page issue) */
 .page {
   width: 210mm;
   min-height: 297mm; 
@@ -28,6 +29,7 @@ body { -webkit-print-color-adjust: exact; }
   flex-direction: column;
 }
 
+/* Watermark centered: Opacity reduced for typical watermark effect */
 .page::before{
 content: "";
 position: absolute; 
@@ -40,11 +42,12 @@ background-image: url('watermark.png');
 background-repeat: no-repeat;
 background-position: center;
 background-size: contain;
-opacity: 0.05;
+opacity: 0.05; /* MODIFICATION: Reduced opacity */
 pointer-events: none;
 z-index: 0;
 }
 
+/* CONTENT HEIGHT CORRECTION */
 .page-content-wrapper {
   flex-grow: 1; 
   display: flex;
@@ -53,8 +56,10 @@ z-index: 0;
   box-sizing: border-box;
 }
 
+/* MARGIN COMPACTION FOR HEADER/BODY */
+/* FIX: Increased padding-bottom to ensure logo does not overlap the border-b line when printing */
 .page-content-wrapper > .border-b {
-    padding-bottom: 30px !important; 
+    padding-bottom: 30px !important; /* MODIFICATION: Increased from 7px for logo clearance */
     margin-bottom: 7px !important; 
 }
 .page-content-wrapper > .grid.grid-cols-4 {
@@ -62,22 +67,28 @@ z-index: 0;
 }
 
 
+/* Footer Container */
 .page-footer-area {
   margin-top: auto; 
   width: 100%;
   padding-top: 3mm; 
 }
 
+/* --- COLOR FIXES --- */
+/* Ensure all text in the footer area is black when printing */
 .page-footer-area, #finalFooter, #disclaimer, #printDate {
     color: black !important;
 }
 .muted { 
     color: black !important; 
 }
+/* HEADER COLOR FIX: Override the screen's indigo color with black */
 .school-name-color { 
     color: black !important; 
 }
 
+
+/* Footer (single horizontal line) - ALIGNMENT FIXES */
 #finalFooter {
   width: 100%;
   display: flex;
@@ -90,6 +101,7 @@ z-index: 0;
     width: 33%; 
     box-sizing: border-box; 
     text-align: center; 
+    /* Principal alignment fix */
     display: flex; 
     flex-direction: column;
     justify-content: flex-end; 
@@ -110,6 +122,7 @@ z-index: 0;
 }
 
 
+/* Disclaimer & Print Date */
 #disclaimer {
   width: 100%;
   text-align: center;
@@ -124,12 +137,35 @@ z-index: 0;
   margin-top: 2px; 
   z-index: 2;
 }
+/* table print behavior */
 table { page-break-inside:relative; }
 tr { page-break-inside:avoid; page-break-after:relative; }
+
+/* ANNUAL REPORT: Grouping headers */
+.marks-header-group {
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #e5e7eb;
+    background-color: #d1fae5; /* Light green for grouping */
+}
+
+/* ANNUAL REPORT: Fixed width for inputs to fit more columns */
+.marksTableInput {
+    width: 32px; 
+    padding: 1px;
+    font-size: 0.75rem;
+}
+.marksTableInput-lg {
+    width: 40px; 
+    padding: 1px;
+    font-size: 0.75rem;
+}
+
 }
 
 /* ---------------- SCREEN ---------------- */
 body { background: #ffffff; }
+/* Hide print-only attendance block on screen */
 .print-only { display: none; } 
 
 .page { width: 900px; margin: 20px auto; padding: 18px; background: white; box-shadow: 0 6px 18px rgba(0,0,0,0.08); border: 2px solid #0f172a;
@@ -139,6 +175,7 @@ body { background: #ffffff; }
   flex-grow: 1;
 }
 
+/* Screen style for school name */
 .school-name-color { color: #4f46e5; } 
 .school-name { letter-spacing: 1px; }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -147,9 +184,66 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .signature-sign { font-weight:600; text-align:center; margin-top:8px; }
 table input[type="number"] { text-align:center; }
 select.grade-select { padding:4px; border-radius:4px; }
+
+/* ANNUAL REPORT: Grouping headers (screen) */
+.marks-header-group {
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #e5e7eb;
+    background-color: #d1fae5; /* Light green for grouping */
+}
+
+/* ANNUAL REPORT: Fixed width for inputs to fit more columns (screen) */
+.marksTableInput {
+    width: 36px; 
+    padding: 1px;
+    font-size: 0.75rem;
+}
+.marksTableInput-lg {
+    width: 48px; 
+    padding: 1px;
+    font-size: 0.75rem;
+}
+
+/* MODIFICATION: INITIAL HIDE OF MAIN CONTENT and MODAL STYLES */
+.main-content {
+    display: none; /* Hidden by default until login successful */
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+}
 </style>
 </head>
 <body class="bg-gray-100 p-6">
+
+<div id="loginModal" class="modal-overlay hidden">
+    <div class="bg-white p-8 rounded-lg shadow-2xl w-96">
+        <h2 class="text-xl font-bold mb-4 text-indigo-600">Secure Login Required</h2>
+        <div class="mb-4">
+            <label for="loginPasswordInput" class="block text-sm font-medium text-gray-700">Enter Password</label>
+            <input type="password" id="loginPasswordInput" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="Password" onkeydown="if(event.key==='Enter') handleLoginAttempt()">
+        </div>
+        <div class="mb-6 flex items-center">
+            <input type="checkbox" id="showPasswordCheckbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" onclick="togglePasswordVisibility()">
+            <label for="showPasswordCheckbox" class="ml-2 block text-sm text-gray-900">
+                Show Password
+            </label>
+        </div>
+        <button id="loginBtn" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onclick="handleLoginAttempt()">
+            Login
+        </button>
+    </div>
+</div>
+<div class="main-content">
 <div class="no-print mb-4 p-4 bg-yellow-100 border rounded">
 <h2 class="font-bold mb-2">School Dashboard (Topper Analysis)</h2>
 <label class="block text-sm text-gray-600 mb-1">Select Class to See Topper:</label>
@@ -184,7 +278,6 @@ select.grade-select { padding:4px; border-radius:4px; }
         <div class="text-center ml-[112px] mr-[112px]"> 
             <h1 class="text-2xl font-extrabold school-name school-name-color">NANDI GURUKUL VIDYA MANDIR</h1>
             <p class="text-sm">Academic Session: <strong>2025-26</strong></p>
-            <!-- MODIFICATION: Changed title to Annual Examination -->
             <p class="text-sm mt-1 text-gray-700 font-semibold">REPORT CARD - ANNUAL EXAMINATION</p>
         </div>
 
@@ -255,11 +348,11 @@ select.grade-select { padding:4px; border-radius:4px; }
     </div>
     </div>
     
-    <div class="mb-4">
+    <div class="mb-4 screen-only">
     <label class="text-sm text-gray-600 font-semibold">Attendance</label>
     <div class="flex gap-2 items-center">
-    <input type="number" id="attendancePresent" min="0" max="220" placeholder="Days Present" class="border px-2 py-1 rounded w-32" />
-    <input type="number" id="attendanceTotal" readonly value="220" class="border px-2 py-1 rounded w-40 bg-gray-200 text-center" title="Total working days" />
+    <input type="number" id="attendancePresent" min="0" max="130" placeholder="Days Present" class="border px-2 py-1 rounded w-32" />
+    <input type="number" id="attendanceTotal" readonly value="130" class="border px-2 py-1 rounded w-40 bg-gray-200 text-center" title="Total working days" />
     </div>
     </div>
     
@@ -285,6 +378,15 @@ select.grade-select { padding:4px; border-radius:4px; }
     <h3 class="font-semibold mb-2">Class Teacher's Remark</h3>
     <div id="teachersRemark" class="w-full p-2 text-sm border rounded bg-gray-50">Good effort. Keep improving.</div>
     </div>
+    
+    <div class="border p-4 mt-4 print-only">
+        <h3 class="font-semibold mb-2">Attendance</h3>
+        <div class="flex gap-2 items-center">
+            <input type="number" id="attendancePresent" min="0" max="130" placeholder="Days Present" class="border px-2 py-1 rounded w-32" />
+            <input type="number" id="attendanceTotal" readonly value="130" class="border px-2 py-1 rounded w-40 bg-gray-200 text-center" title="Total working days" />
+        </div>
+    </div>
+    
     </div>
     <div class="col-span-2">
     <div class="border p-4">
@@ -295,8 +397,6 @@ select.grade-select { padding:4px; border-radius:4px; }
     </div>
   </div>
   <div class="page-footer-area">
-    <!-- MODIFICATION: Added Final Result display -->
-    <div class="text-center font-bold text-lg mb-2" id="finalResult">Final Result: —</div>
     <div id="finalFooter" style="display:flex; justify-content:space-between; align-items:flex-start;">
     <div class="col left" style="text-align:left;">
     <div class="signature-space"></div>
@@ -320,22 +420,29 @@ select.grade-select { padding:4px; border-radius:4px; }
 <div class="no-print text-center mt-6">
 <button id="clearDataBtn" class="px-3 py-1 bg-red-600 text-white rounded">Clear All Data (Requires Password)</button>
 </div>
+</div>
 <script>
-/* ---------------- MODIFICATION: CONFIG & SUBJECTS FOR ANNUAL EXAM ---------------- */
+/* ---------------- CONFIG & SUBJECTS ---------------- */
+// MODIFIED: Added Term 2 fields
 const SUBJECTS_NUR_TO_UKG = [
-{ name: "English", max: { ut1: 15, ut1Oral: 5, hy: 60, hyOral: 20, ut2: 15, ut2Oral: 5, ae: 60, aeOral: 20 } },
-{ name: "Hindi", max: { ut1: 15, ut1Oral: 5, hy: 60, hyOral: 20, ut2: 15, ut2Oral: 5, ae: 60, aeOral: 20 } },
-{ name: "Maths", max: { ut1: 15, ut1Oral: 5, hy: 60, hyOral: 20, ut2: 15, ut2Oral: 5, ae: 60, aeOral: 20 } },
-{ name: "Drawing", max: { ut1: 20, ut1Oral: 0, hy: 80, hyOral: 0, ut2: 20, ut2Oral: 0, ae: 80, aeOral: 0 } }
+// ut1 = UT Written, ut1Oral = UT Oral, hy = Half Yearly Written, hyOral = HY Oral
+// ut2 = UT 2 Written, ut2Oral = UT 2 Oral, final = Final Written, finalOral = Final Oral
+{ name: "English", ut1Max: 15, ut1OralMax: 5, hyMax: 60, hyOralMax: 20, ut2Max: 15, ut2OralMax: 5, finalMax: 60, finalOralMax: 20 },
+{ name: "Hindi", ut1Max: 15, ut1OralMax: 5, hyMax: 60, hyOralMax: 20, ut2Max: 15, ut2OralMax: 5, finalMax: 60, finalOralMax: 20 },
+{ name: "Maths", ut1Max: 15, ut1OralMax: 5, hyMax: 60, hyOralMax: 20, ut2Max: 15, ut2OralMax: 5, finalMax: 60, finalOralMax: 20 },
+// Drawing: special maxima
+{ name: "Drawing", ut1Max: 20, ut1OralMax: 0, hyMax: 80, hyOralMax: 0, ut2Max: 20, ut2OralMax: 0, finalMax: 80, finalOralMax: 0 }
 ];
 const SUBJECTS_1_TO_5 = ["Hindi", "English", "Mathematics", "Computer", "E.V.S.", "Drawing", "G.K."];
 const SUBJECTS_6_TO_8 = ["Hindi", "English", "Mathematics", "Computer", "Drawing", "G.K.", "Science", "S.S.T."];
 const SUBJECTS_9 = ["Hindi", "English", "Mathematics", "Science", "S.S.T.", "Drawing"];
-const DEFAULT_ATT_TOTAL = 220; // Changed for Annual
+const DEFAULT_ATT_TOTAL = 130;
 
+// --- MODIFICATIONS FOR PASSWORD LOGIN AND MANAGEMENT ---
 const LOGIN_PASSWORD_KEY = 'ng_loginPassword';
-const DEFAULT_LOGIN_PASSWORD = '2006';
-const ADMIN_PASSWORD = '1234';
+const DEFAULT_LOGIN_PASSWORD = '2006'; // Initial required login password
+const ADMIN_PASSWORD = '1234';         // Password to change the login password
+// -----------------------------------------------------
 
 /* ---------------- STATE ---------------- */
 let state = {
@@ -343,57 +450,90 @@ selectedClass: '',
 selectedStudentKey: '',
 studentsByClass: {},
 chart: null,
-reportPrintDate: null,
-loginPassword: DEFAULT_LOGIN_PASSWORD
+reportPrintDate: null, 
+loginPassword: DEFAULT_LOGIN_PASSWORD 
 };
 /* ---------------- UTIL ---------------- */
 const qs = id => document.getElementById(id);
 
 /* ---------------- INIT ---------------- */
 function init() {
-    if (!checkLogin()) return;
-
-    const stored = localStorage.getItem('ng_students');
-    state.studentsByClass = stored ? JSON.parse(stored) : {};
-    
-    const storedPass = localStorage.getItem(LOGIN_PASSWORD_KEY);
-    state.loginPassword = storedPass || DEFAULT_LOGIN_PASSWORD;
-
-    const storedDate = localStorage.getItem('ng_reportPrintDate');
-    if (storedDate) {
-        state.reportPrintDate = storedDate;
-        qs('reportPrintDateInput').value = storedDate;
-    }
-    attachEventListeners();
-    initChart();
-    updatePrintDate();
-    renderMarksTableForClass('');
+    // 1. Password Check is now handled by showing the modal
+    showLoginModal();
+    // The rest of the initialization will run inside handleLoginAttempt() on success.
 }
 
-/* ---------------- LOGIN FUNCTIONS ---------------- */
+/* ---------------- LOGIN FUNCTIONS (MODIFIED) ---------------- */
 
-function checkLogin() {
+function showLoginModal() {
+    qs('loginModal').classList.remove('hidden');
+    // Focus the password input when the modal opens
+    setTimeout(() => qs('loginPasswordInput').focus(), 100); 
+}
+
+/**
+ * Handles the custom modal login attempt.
+ */
+function handleLoginAttempt() {
+    const password = qs('loginPasswordInput').value;
+    // Load the most current password from local storage or use the default
     const storedPass = localStorage.getItem(LOGIN_PASSWORD_KEY);
     state.loginPassword = storedPass || DEFAULT_LOGIN_PASSWORD;
-    document.body.style.display = 'none'; 
-    let password = prompt('Enter Login Password:'); 
 
     if (password === state.loginPassword) {
-        document.body.style.display = 'block';
+        // Successful login
+        qs('loginModal').classList.add('hidden'); // Hide modal
+        document.querySelector('.main-content').style.display = 'block'; // Show main content
+        
+        // --- RESUME INITIALIZATION ---
+        const stored = localStorage.getItem('ng_students');
+        state.studentsByClass = stored ? JSON.parse(stored) : {};
+
+        const storedDate = localStorage.getItem('ng_reportPrintDate');
+        if (storedDate) {
+            state.reportPrintDate = storedDate;
+            qs('reportPrintDateInput').value = storedDate; // Update the input field
+        }
+        
+        attachEventListeners();
+        initChart();
+        updatePrintDate();
+        renderMarksTableForClass(''); // initial empty
+        
         return true;
     } else {
-        document.body.style.display = 'block'; 
         alert('Incorrect Password! Access Denied.');
-        document.body.innerHTML = '<div style="margin: 50px; text-align: center;"><h1 style="color: red;">ACCESS DENIED. Incorrect Password.</h1></div>';
+        qs('loginPasswordInput').value = '';
         return false;
+    }
+}
+
+/**
+ * Toggles the visibility of the password input field.
+ */
+function togglePasswordVisibility() {
+    const passwordInput = qs('loginPasswordInput');
+    const checkbox = qs('showPasswordCheckbox');
+    if (checkbox.checked) {
+        passwordInput.type = 'text';
+    } else {
+        passwordInput.type = 'password';
     }
 }
 
 function changeLoginPassword() {
     const adminPass = prompt('Enter Admin Password to change Login Password:'); 
-    if (adminPass !== ADMIN_PASSWORD) return alert('Incorrect Admin Password!');
+    
+    if (adminPass !== ADMIN_PASSWORD) {
+        return alert('Incorrect Admin Password! Cannot change login password.');
+    }
+    
     const newPass = prompt('Enter New Login Password:');
-    if (!newPass || newPass.trim() === '') return alert('New password cannot be empty.');
+    
+    if (!newPass || newPass.trim() === '') {
+        return alert('New password cannot be empty.');
+    }
+    
     state.loginPassword = newPass;
     localStorage.setItem(LOGIN_PASSWORD_KEY, newPass);
     alert(`Login Password successfully updated to: ${newPass}. Please remember it for the next login.`);
@@ -426,16 +566,20 @@ const admission = qs('admissionInput').value.trim();
 if (!admission) return alert('Enter Admission Number.');
 const name = qs('studentNameInput').value.trim();
 if (!name) return alert('Enter Student Name.');
+// Capture Father Name input
 const fatherName = qs('fatherNameInput').value.trim();
 const key = `${state.selectedClass}|${admission}`;
 state.studentsByClass[state.selectedClass] = state.studentsByClass[state.selectedClass] || {};
+// Passed fatherName to makeEmptyStudent
 const student = makeEmptyStudent(name, admission, state.selectedClass, fatherName);
 if (state.studentsByClass[state.selectedClass][key]) {
+// preserve existing marks
 const ex = state.studentsByClass[state.selectedClass][key];
 student.marks = ex.marks || student.marks;
 student.attendance = ex.attendance || ex.attendance;
 student.coscholastic = ex.coscholastic || student.coscholastic;
 student.teachersRemark = ex.teachersRemark || student.teachersRemark;
+// Ensure fatherName is preserved/updated
 student.fatherName = fatherName || ex.fatherName || student.fatherName;
 }
 state.studentsByClass[state.selectedClass][key] = student;
@@ -467,25 +611,37 @@ window.print();
 });
 qs('dashboardClassSelect').addEventListener('change', showDashboardTopper);
 qs('bulkDownloadBtn').addEventListener('click', bulkDownloadReports);
+// MODIFICATION 1: Attach Download Excel event listener
 qs('downloadExcelBtn').addEventListener('click', downloadMarksExcel);
+// MODIFICATION 2: Attach Set Print Date event listener
 qs('setPrintDateBtn').addEventListener('click', setReportPrintDate);
+
+// ADDED: Attach Set New Login Password event listener
 qs('setNewLoginPassBtn').addEventListener('click', changeLoginPassword);
+
 qs('clearDataBtn').addEventListener('click', clearAllData);
 }
 /* ---------------- PERSISTENCE ---------------- */
 function persistStudents() {
 localStorage.setItem('ng_students', JSON.stringify(state.studentsByClass));
 }
-/* ---------------- MODIFICATION: STUDENT FACTORY FOR ANNUAL EXAM ---------------- */
+/* ---------------- STUDENT FACTORY ---------------- */
+// Added fatherName as an argument
 function makeEmptyStudent(name, admission, cls, fatherName='') {
 const marks = [];
 if (isNurToUkg(cls)) {
 SUBJECTS_NUR_TO_UKG.forEach(s => {
 marks.push({
 name: s.name,
-ut1: 0, ut1Oral: 0, hy: 0, hyOral: 0,
-ut2: 0, ut2Oral: 0, ae: 0, aeOral: 0,
-max: s.max
+// Term 1 (existing marks re-mapped)
+ut: 0, utOral: s.ut1OralMax || 0, hy: 0, hyOral: s.hyOralMax || 0,
+// Term 2 (new fields)
+ut2: 0, ut2Oral: s.ut2OralMax || 0, final: 0, finalOral: s.finalOralMax || 0,
+total: 0,
+max: { 
+    ut1Max: s.ut1Max, ut1OralMax: s.ut1OralMax, hyMax: s.hyMax, hyOralMax: s.hyOralMax,
+    ut2Max: s.ut2Max, ut2OralMax: s.ut2OralMax, finalMax: s.finalMax, finalOralMax: s.finalOralMax
+}
 });
 });
 } else {
@@ -494,15 +650,13 @@ subs.forEach(s => {
 if (s === 'G.K.') {
 marks.push({ name: s, grade: 'A', isGrade: true });
 } else {
-marks.push({ 
-    name: s, ut1: 0, hy: 0, ut2: 0, ae: 0, isGrade: false,
-    max: { ut1: 20, hy: 80, ut2: 20, ae: 80 }
-});
+// MODIFIED: Added ut2 and final fields
+marks.push({ name: s, ut: 0, hy: 0, ut2: 0, final: 0, total: 0, isGrade: false, max: { utMax: 20, hyMax: 80, ut2Max: 20, finalMax: 80 } });
 }
 });
 }
 return {
-name, admission, cls, fatherName, marks,
+name, admission, cls, fatherName, marks, // Added fatherName
 coscholastic: {},
 attendance: { present: 0, total: DEFAULT_ATT_TOTAL },
 teachersRemark: 'Good effort. Keep improving.',
@@ -519,7 +673,7 @@ if (n >=6 && n <=8) return SUBJECTS_6_TO_8.slice();
 if (n === 9) return SUBJECTS_9.slice();
 return [];
 }
-/* ---------------- MODIFICATION: RENDER MARKS TABLE FOR ANNUAL EXAM ---------------- */
+/* ---------------- RENDER MARKS TABLE PER CLASS ---------------- */
 function renderMarksTableForClass(cls) {
 const thead = qs('marksTableHead');
 const tbody = qs('marksTableBody');
@@ -527,80 +681,174 @@ const tfoot = qs('marksTableFoot');
 tbody.innerHTML = '';
 tfoot.innerHTML = '';
 if (!cls) {
-thead.innerHTML = `<tr><th class="border px-3 py-2 text-left">Select a class to begin</th></tr>`;
+// Initial empty header
+thead.innerHTML = `<tr class="bg-green-100"><th class="border px-3 py-2 text-left">Subject</th><th class="border px-3 py-2 text-center">Unit Test</th><th class="border px-3 py-2 text-center">Final</th><th class="border px-3 py-2 text-center">Overall Performance</th></tr>`;
 return;
 }
+
 if (isNurToUkg(cls)) {
+// MODIFIED: Nur-UKG Header - Term 1, Term 2/Final, Overall
 thead.innerHTML = `
 <tr class="bg-green-100">
-<th rowspan="2" class="border px-2 py-1 align-middle text-left">Subject</th>
-<th colspan="5" class="border px-2 py-1 text-center">Term 1</th>
-<th colspan="5" class="border px-2 py-1 text-center">Term 2</th>
-<th colspan="3" rowspan="2" class="border px-2 py-1 align-middle text-center">Overall</th>
+    <th class="border px-3 py-2 text-left" rowspan="2">Subject</th>
+    <th class="marks-header-group" colspan="4">Term 1</th>
+    <th class="marks-header-group" colspan="4">Term 2 (Final)</th>
+    <th class="border px-3 py-2 text-center" rowspan="2">Overall Total</th>
 </tr>
-<tr class="bg-green-50 text-xs">
-<th class="border px-1">UT1</th><th class="border px-1">Oral</th>
-<th class="border px-1">HY</th><th class="border px-1">Oral</th><th class="border px-1 font-bold">Total</th>
-<th class="border px-1">UT2</th><th class="border px-1">Oral</th>
-<th class="border px-1">AE</th><th class="border px-1">Oral</th><th class="border px-1 font-bold">Total</th>
-</tr>`;
+<tr class="bg-green-100">
+    <th class="border px-1 py-1 text-center">UT 1 Written</th>
+    <th class="border px-1 py-1 text-center">UT 1 Oral</th>
+    <th class="border px-1 py-1 text-center">HY Written</th>
+    <th class="border px-1 py-1 text-center">HY Oral</th>
+    <th class="border px-1 py-1 text-center">UT 2 Written</th>
+    <th class="border px-1 py-1 text-center">UT 2 Oral</th>
+    <th class="border px-1 py-1 text-center">Final Written</th>
+    <th class="border px-1 py-1 text-center">Final Oral</th>
+</tr>
+`;
 const student = getCurrentStudent();
-const marksData = student ? student.marks : SUBJECTS_NUR_TO_UKG.map(s => ({ name: s.name, max: s.max }));
-marksData.forEach((m, idx) => {
+const rows = student ? student.marks : SUBJECTS_NUR_TO_UKG.map(s => ({ name: s.name }));
+rows.forEach((m, idx) => {
+    const max = (m.max || SUBJECTS_NUR_TO_UKG[idx]);
+    
+    // Term 1 Values
+    const ut1Max = max.ut1Max; const ut1OralMax = max.ut1OralMax; const hyMax = max.hyMax; const hyOralMax = max.hyOralMax;
+    const ut1Val = (student && student.marks[idx]) ? (student.marks[idx].ut || 0) : 0; // 'ut' is re-purposed for ut1
+    const ut1OralVal = (student && student.marks[idx]) ? (student.marks[idx].utOral || 0) : 0; // 'utOral' is re-purposed for ut1Oral
+    const hyVal = (student && student.marks[idx]) ? (student.marks[idx].hy || 0) : 0;
+    const hyOralVal = (student && student.marks[idx]) ? (student.marks[idx].hyOral || 0) : 0;
+
+    // Term 2 Values (New fields)
+    const ut2Max = max.ut2Max; const ut2OralMax = max.ut2OralMax; const finalMax = max.finalMax; const finalOralMax = max.finalOralMax;
+    const ut2Val = (student && student.marks[idx]) ? (student.marks[idx].ut2 || 0) : 0;
+    const ut2OralVal = (student && student.marks[idx]) ? (student.marks[idx].ut2Oral || 0) : 0;
+    const finalVal = (student && student.marks[idx]) ? (student.marks[idx].final || 0) : 0;
+    const finalOralVal = (student && student.marks[idx]) ? (student.marks[idx].finalOral || 0) : 0;
+
     tbody.insertAdjacentHTML('beforeend', `
     <tr>
-        <td class="border px-2 py-1">${m.name}</td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ut1" type="number" min="0" max="${m.max.ut1}" value="${m.ut1||0}" class="w-10 p-1 border rounded" /></td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ut1Oral" type="number" min="0" max="${m.max.ut1Oral}" value="${m.ut1Oral||0}" class="w-10 p-1 border rounded" ${m.max.ut1Oral===0?'disabled':''}/></td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="hy" type="number" min="0" max="${m.max.hy}" value="${m.hy||0}" class="w-10 p-1 border rounded" /></td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="hyOral" type="number" min="0" max="${m.max.hyOral}" value="${m.hyOral||0}" class="w-10 p-1 border rounded" ${m.max.hyOral===0?'disabled':''}/></td>
-        <td class="border px-1 py-1 text-center font-bold">${m.t1_total||0}</td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ut2" type="number" min="0" max="${m.max.ut2}" value="${m.ut2||0}" class="w-10 p-1 border rounded" /></td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ut2Oral" type="number" min="0" max="${m.max.ut2Oral}" value="${m.ut2Oral||0}" class="w-10 p-1 border rounded" ${m.max.ut2Oral===0?'disabled':''}/></td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ae" type="number" min="0" max="${m.max.ae}" value="${m.ae||0}" class="w-10 p-1 border rounded" /></td>
-        <td class="border px-1 py-1"><input data-idx="${idx}" data-field="aeOral" type="number" min="0" max="${m.max.aeOral}" value="${m.aeOral||0}" class="w-10 p-1 border rounded" ${m.max.aeOral===0?'disabled':''}/></td>
-        <td class="border px-1 py-1 text-center font-bold">${m.t2_total||0}</td>
-        <td class="border px-1 py-1 text-center font-semibold">${m.grand_total||0}</td>
-        <td class="border px-1 py-1 text-center font-semibold">${(m.percentage||0).toFixed(1)}%</td>
-        <td class="border px-1 py-1 text-center font-semibold">${m.grade||'--'}</td>
-    </tr>`);
+        <td class="border px-3 py-2">${m.name}</td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="ut" type="number" min="0" max="${ut1Max}" value="${ut1Val}" class="marksTableInput p-1 border rounded" />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="utOral" type="number" min="0" max="${ut1OralMax}" value="${ut1OralVal}" class="marksTableInput p-1 border rounded" ${ut1OralMax===0?'disabled':''} />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="hy" type="number" min="0" max="${hyMax}" value="${hyVal}" class="marksTableInput-lg p-1 border rounded" />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="hyOral" type="number" min="0" max="${hyOralMax}" value="${hyOralVal}" class="marksTableInput p-1 border rounded" ${hyOralMax===0?'disabled':''} />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="ut2" type="number" min="0" max="${ut2Max}" value="${ut2Val}" class="marksTableInput p-1 border rounded" />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="ut2Oral" type="number" min="0" max="${ut2OralMax}" value="${ut2OralVal}" class="marksTableInput p-1 border rounded" ${ut2OralMax===0?'disabled':''} />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="final" type="number" min="0" max="${finalMax}" value="${finalVal}" class="marksTableInput-lg p-1 border rounded" />
+        </td>
+        <td class="border px-1 py-2 text-center">
+            <input data-idx="${idx}" data-field="finalOral" type="number" min="0" max="${finalOralMax}" value="${finalOralVal}" class="marksTableInput p-1 border rounded" ${finalOralMax===0?'disabled':''} />
+        </td>
+        <td class="border px-3 py-2 font-semibold text-center">${student ? (student.marks[idx].total || 0) : 0}</td>
+    </tr>
+    `);
 });
-} else { // Classes 1-9
+tfoot.innerHTML = `
+<tr class="bg-gray-50">
+<td class="border px-3 py-2 font-semibold text-right">Total</td>
+<td id="totalUT1W" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalUT1O" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalHYW" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalHYO" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalUT2W" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalUT2O" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalFinalW" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalFinalO" class="border px-1 py-2 font-semibold text-center">0</td>
+<td id="totalOverall" class="border px-3 py-2 font-semibold text-center">0</td>
+</tr>
+<tr class="bg-gray-50">
+<td colspan="9" class="border px-3 py-2 font-semibold text-right">Percentage</td>
+<td id="percentage" class="border px-3 py-2 font-semibold text-center">0%</td>
+</tr>
+`;
+} else {
+// MODIFIED: Classes 1-9 Header - Term 1, Term 2/Final, Overall
 thead.innerHTML = `
 <tr class="bg-green-100">
-    <th rowspan="2" class="border px-2 py-1 align-middle text-left">Subject</th>
-    <th colspan="3" class="border px-2 py-1 text-center">Term 1</th>
-    <th colspan="3" class="border px-2 py-1 text-center">Term 2</th>
-    <th colspan="3" rowspan="2" class="border px-2 py-1 align-middle text-center">Overall Performance</th>
+<th class="border px-3 py-2 text-left" rowspan="2">Subject</th>
+<th class="marks-header-group" colspan="2">Term 1</th>
+<th class="marks-header-group" colspan="2">Term 2 (Final)</th>
+<th class="border px-3 py-2 text-center" rowspan="2">Overall Total</th>
 </tr>
-<tr class="bg-green-50 text-xs">
-    <th class="border px-1">UT1 (20)</th><th class="border px-1">HY (80)</th><th class="border px-1 font-bold">Total (100)</th>
-    <th class="border px-1">UT2 (20)</th><th class="border px-1">AE (80)</th><th class="border px-1 font-bold">Total (100)</th>
-</tr>`;
+<tr class="bg-green-100">
+<th class="border px-3 py-2 text-center">UT 1 (Max: 20)</th>
+<th class="border px-3 py-2 text-center">Half Yearly (Max: 80)</th>
+<th class="border px-3 py-2 text-center">UT 2 (Max: 20)</th>
+<th class="border px-3 py-2 text-center">Final (Max: 80)</th>
+</tr>
+`;
 const subs = subjectsForClass(cls);
 const student = getCurrentStudent();
 subs.forEach((s, idx) => {
-    const mark = student ? student.marks[idx] : null;
-    if (s === 'G.K.') {
-        tbody.insertAdjacentHTML('beforeend', `<tr><td class="border px-2 py-1">${s}</td><td colspan="9" class="border px-2 py-1 text-center"><select data-idx="${idx}" data-field="grade" class="grade-select"><option value="A"${(mark&&mark.grade==='A')?' selected':''}>A</option><option value="B"${(mark&&mark.grade==='B')?' selected':''}>B</option><option value="C"${(mark&&mark.grade==='C')?' selected':''}>C</option><option value="D"${(mark&&mark.grade==='D')?' selected':''}>D</option></select></td></tr>`);
-    } else {
-        tbody.insertAdjacentHTML('beforeend', `
-        <tr>
-            <td class="border px-2 py-1">${s}</td>
-            <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ut1" type="number" min="0" max="20" value="${mark?mark.ut1||0:0}" class="w-12 p-1 border rounded" /></td>
-            <td class="border px-1 py-1"><input data-idx="${idx}" data-field="hy" type="number" min="0" max="80" value="${mark?mark.hy||0:0}" class="w-12 p-1 border rounded" /></td>
-            <td class="border px-1 py-1 text-center font-bold">${mark?mark.t1_total||0:0}</td>
-            <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ut2" type="number" min="0" max="20" value="${mark?mark.ut2||0:0}" class="w-12 p-1 border rounded" /></td>
-            <td class="border px-1 py-1"><input data-idx="${idx}" data-field="ae" type="number" min="0" max="80" value="${mark?mark.ae||0:0}" class="w-12 p-1 border rounded" /></td>
-            <td class="border px-1 py-1 text-center font-bold">${mark?mark.t2_total||0:0}</td>
-            <td class="border px-1 py-1 text-center font-semibold">${mark?mark.grand_total||0:0}</td>
-            <td class="border px-1 py-1 text-center font-semibold">${(mark?(mark.percentage||0):0).toFixed(1)}%</td>
-            <td class="border px-1 py-1 text-center font-semibold">${mark?mark.grade||'--': '--'}</td>
-        </tr>`);
-    }
-});
+const mark = student ? student.marks[idx] : null;
+if (s === 'G.K.') {
+const grade = mark ? (mark.grade || 'A') : 'A';
+tbody.insertAdjacentHTML('beforeend', `
+<tr>
+<td class="border px-3 py-2">${s}</td>
+<td class="border px-3 py-2 text-center">—</td>
+<td class="border px-3 py-2 text-center">—</td>
+<td class="border px-3 py-2 text-center">—</td>
+<td class="border px-3 py-2 text-center">—</td>
+<td class="border px-3 py-2 text-center">
+<select data-idx="${idx}" data-field="grade" class="grade-select">
+<option value="A"${grade==='A'?' selected':''}>A</option>
+<option value="B"${grade==='B'?' selected':''}>B</option>
+<option value="C"${grade==='C'?' selected':''}>C</option>
+<option value="D"${grade==='D'?' selected':''}>D</option>
+</select>
+</td>
+</tr>
+`);
+} else {
+// Term 1 (existing fields)
+const utVal = mark ? (mark.ut || 0) : 0;
+const hyVal = mark ? (mark.hy || 0) : 0;
+// Term 2 (new fields)
+const ut2Val = mark ? (mark.ut2 || 0) : 0;
+const finalVal = mark ? (mark.final || 0) : 0;
+
+const overall = mark ? (mark.total || 0) : 0;
+tbody.insertAdjacentHTML('beforeend', `
+<tr>
+<td class="border px-3 py-2">${s}</td>
+<td class="border px-3 py-2 text-center"><input data-idx="${idx}" data-field="ut" type="number" min="0" max="20" value="${utVal}" class="marksTableInput-lg p-1 border rounded" /></td>
+<td class="border px-3 py-2 text-center"><input data-idx="${idx}" data-field="hy" type="number" min="0" max="80" value="${hyVal}" class="marksTableInput-lg p-1 border rounded" /></td>
+<td class="border px-3 py-2 text-center"><input data-idx="${idx}" data-field="ut2" type="number" min="0" max="20" value="${ut2Val}" class="marksTableInput-lg p-1 border rounded" /></td>
+<td class="border px-3 py-2 text-center"><input data-idx="${idx}" data-field="final" type="number" min="0" max="80" value="${finalVal}" class="marksTableInput-lg p-1 border rounded" /></td>
+<td class="border px-3 py-2 font-semibold text-center">${overall}</td>
+</tr>
+`);
 }
-tfoot.innerHTML = `<tr class="bg-gray-50 font-bold"><td colspan="7" class="border px-3 py-2 text-right">Overall Total:</td><td id="grandTotal" class="border px-3 py-2 text-center">0</td><td id="finalPercentage" class="border px-3 py-2 text-center">0%</td><td id="finalGrade" class="border px-3 py-2 text-center">--</td></tr>`;
+});
+tfoot.innerHTML = `
+<tr class="bg-gray-50">
+<td class="border px-3 py-2 font-semibold text-right">Total</td>
+<td id="totalUT1" class="border px-3 py-2 font-semibold text-center">0</td>
+<td id="totalHY" class="border px-3 py-2 font-semibold text-center">0</td>
+<td id="totalUT2" class="border px-3 py-2 font-semibold text-center">0</td>
+<td id="totalFinal" class="border px-3 py-2 font-semibold text-center">0</td>
+<td id="totalOverall" class="border px-3 py-2 font-semibold text-center">0</td>
+</tr>
+<tr class="bg-gray-50">
+<td colspan="5" class="border px-3 py-2 font-semibold text-right">Percentage</td>
+<td id="percentage" class="border px-3 py-2 font-semibold text-center">0%</td>
+</tr>
+`;
+}
 attachMarksInputsListeners();
 calculateTotalsAndUpdate();
 }
@@ -611,6 +859,7 @@ el.addEventListener('input', e => {
 autoClampInput(el);
 calculateTotalsAndUpdate();
 });
+// also clamp on blur to be safe
 el.addEventListener('blur', () => { autoClampInput(el); calculateTotalsAndUpdate(); });
 });
 }
@@ -624,8 +873,13 @@ if (isNaN(val)) {
 el.value = '';
 return;
 }
-if (!isNaN(max) && max >= 0 && val > max) el.value = max;
-if (!isNaN(min) && val < min) el.value = min;
+if (!isNaN(max) && max >= 0 && val > max) {
+el.value = max;
+val = max;
+}
+if (!isNaN(min) && val < min) {
+el.value = min;
+}
 }
 /* ---------------- LOAD / SAVE STUDENT ---------------- */
 function loadStudent(key) {
@@ -634,38 +888,69 @@ const student = state.studentsByClass[cls] && state.studentsByClass[cls][key];
 if (!student) return alert('Student data not found.');
 state.selectedStudentKey = key;
 state.selectedClass = cls;
+// set class select to roman or textual
 const romanMap = { "1":"I","2":"II","3":"III","4":"IV","5":"V","6":"VI","7":"VII","8":"VIII","9":"IX" };
-qs('classSelect').value = (cls in romanMap) ? romanMap[cls] : cls;
-
+if (cls === 'Nursery' || cls === 'LKG' || cls === 'UKG') {
+qs('classSelect').value = cls;
+} else {
+qs('classSelect').value = romanMap[cls] || cls;
+}
 qs('studentName').textContent = student.name;
 qs('admissionNo').textContent = student.admission || '—';
 qs('classSection').textContent = displayClassLabel(student.cls);
+// Load father name for display
 qs('fatherName').textContent = student.fatherName || '—';
 qs('studentNameInput').value = student.name;
 qs('admissionInput').value = student.admission || '';
-if (qs('fatherNameInput')) qs('fatherNameInput').value = student.fatherName || '';
-qs('attendancePresent').value = student.attendance.present || 0;
-qs('attendanceTotal').value = student.attendance.total || DEFAULT_ATT_TOTAL;
+// Load father name for input control
+if (qs('fatherNameInput')) {
+qs('fatherNameInput').value = student.fatherName || '';
+}
+// Load attendance from the screen-only input fields, which are present in both HTML blocks
+document.querySelectorAll('#attendancePresent').forEach(el => el.value = student.attendance.present || 0);
+document.querySelectorAll('#attendanceTotal').forEach(el => el.value = student.attendance.total || DEFAULT_ATT_TOTAL);
 
-renderMarksTableForClass(student.cls); // This now renders with saved values
+renderMarksTableForClass(student.cls);
+// populate marks into inputs/selects
+qs('marksTableBody').querySelectorAll('input, select').forEach(el => {
+const idx = Number(el.getAttribute('data-idx'));
+const field = el.getAttribute('data-field');
+if (!Number.isFinite(idx)) return;
+const m = student.marks[idx];
+if (!m) return;
+if (el.tagName.toLowerCase() === 'select') {
+// grade
+el.value = m.grade || 'A';
+} else {
+// Use || 0 to ensure new fields (ut2, final etc.) load as 0 instead of NaN/undefined
+const val = m[field] ?? 0;
+if (typeof val === 'number') el.value = val;
+}
+});
+// coscholastic
 student.coscholastic = student.coscholastic || {};
 qs('coscholasticBody').innerHTML = `
 <tr><td>Work Habits</td><td><input type="text" id="workHabitsInput" value="${student.coscholastic.workHabits || ''}" placeholder="e.g. A, B, C" class="border px-1 py-0.5 rounded w-full" /></td></tr>
 <tr><td>Behavior</td><td><input type="text" id="behaviorInput" value="${student.coscholastic.behavior || ''}" placeholder="e.g. A, B, C" class="border px-1 py-0.5 rounded w-full"/></td></tr>
 `;
+attachMarksInputsListeners();
 calculateTotalsAndUpdate();
 }
 function saveCurrentStudent() {
 if (!state.selectedStudentKey) return alert('Load or add a student first.');
 const student = getCurrentStudent();
 if (!student) return;
+// Save from the *first* visible instance of attendance input
 student.attendance.present = Number(document.getElementById('attendancePresent').value) || 0;
 student.attendance.total = Number(document.getElementById('attendanceTotal').value) || DEFAULT_ATT_TOTAL;
+// Save Father Name from input control
 student.fatherName = qs('fatherNameInput') ? qs('fatherNameInput').value.trim() : '';
+// coscholastic
 student.coscholastic = {
 workHabits: qs('workHabitsInput') ? qs('workHabitsInput').value.trim() : '',
 behavior: qs('behaviorInput') ? qs('behaviorInput').value.trim() : ''
 };
+// collect marks from inputs
 qs('marksTableBody').querySelectorAll('input, select').forEach(el => {
 const idx = Number(el.getAttribute('data-idx'));
 const field = el.getAttribute('data-field');
@@ -675,6 +960,7 @@ if (el.tagName.toLowerCase() === 'select') {
 student.marks[idx].grade = el.value;
 student.marks[idx].isGrade = true;
 } else {
+// Ensure all mark fields are saved as numbers
 student.marks[idx][field] = Number(el.value) || 0;
 }
 });
@@ -687,94 +973,187 @@ if (!state.selectedStudentKey) return null;
 const [cls] = state.selectedStudentKey.split('|');
 return state.studentsByClass[cls] && state.studentsByClass[cls][state.selectedStudentKey];
 }
-/* ---------------- MODIFICATION: CALCULATIONS FOR ANNUAL EXAM ---------------- */
-function getGrade(percentage) {
-    if (percentage >= 91) return 'A1';
-    if (percentage >= 81) return 'A2';
-    if (percentage >= 71) return 'B1';
-    if (percentage >= 61) return 'B2';
-    if (percentage >= 51) return 'C1';
-    if (percentage >= 41) return 'C2';
-    if (percentage >= 33) return 'D';
-    return 'E';
-}
-
+/* ---------------- CALCULATIONS & REMARKS ---------------- */
 function calculateTotalsAndUpdate() {
 const student = getCurrentStudent();
-if (!student) return;
-
-// Collect latest marks from inputs
+// if student exists update from inputs first
+if (student) {
 qs('marksTableBody').querySelectorAll('input, select').forEach(el => {
-    const idx = Number(el.getAttribute('data-idx'));
-    const field = el.getAttribute('data-field');
-    if (!Number.isFinite(idx) || !student.marks[idx]) return;
-    if (el.tagName.toLowerCase() === 'select') student.marks[idx].grade = el.value;
-    else student.marks[idx][field] = Number(el.value) || 0;
+const idx = Number(el.getAttribute('data-idx'));
+const field = el.getAttribute('data-field');
+if (!Number.isFinite(idx)) return;
+student.marks[idx] = student.marks[idx] || {};
+if (el.tagName.toLowerCase() === 'select') {
+student.marks[idx].grade = el.value;
+student.marks[idx].isGrade = true;
+} else {
+student.marks[idx][field] = Number(el.value) || 0;
+}
 });
-
-let grandTotal = 0;
-let maxTotal = 0;
-let isFail = false;
-
+}
+// perform totals depending on class
+let percentage = 0;
+if (student && isNurToUkg(student.cls)) {
+let totals = { ut1W:0, ut1O:0, hyW:0, hyO:0, ut2W:0, ut2O:0, finalW:0, finalO:0, overall:0 }; // MODIFIED: New fields
+let maxOverall = 0; 
 student.marks.forEach(m => {
-    if (m.isGrade) return; // Skip G.K.
+// Term 1
+const ut1W = Number(m.ut) || 0;
+const ut1O = Number(m.utOral) || 0;
+const hyW = Number(m.hy) || 0;
+const hyO = Number(m.hyOral) || 0;
+// Term 2
+const ut2W = Number(m.ut2) || 0;
+const ut2O = Number(m.ut2Oral) || 0;
+const finalW = Number(m.final) || 0;
+const finalO = Number(m.finalOral) || 0;
 
-    let maxSubjTotal = 0;
-    if(isNurToUkg(student.cls)) {
-        m.t1_total = (m.ut1||0) + (m.ut1Oral||0) + (m.hy||0) + (m.hyOral||0);
-        m.t2_total = (m.ut2||0) + (m.ut2Oral||0) + (m.ae||0) + (m.aeOral||0);
-        maxSubjTotal = (m.max.ut1 + m.max.ut1Oral + m.max.hy + m.max.hyOral + m.max.ut2 + m.max.ut2Oral + m.max.ae + m.max.aeOral);
-    } else {
-        m.t1_total = (m.ut1||0) + (m.hy||0);
-        m.t2_total = (m.ut2||0) + (m.ae||0);
-        maxSubjTotal = 200;
-    }
-    
-    m.grand_total = m.t1_total + m.t2_total;
-    m.percentage = maxSubjTotal > 0 ? (m.grand_total / maxSubjTotal) * 100 : 0;
-    m.grade = getGrade(m.percentage);
+const subjTotal = ut1W + ut1O + hyW + hyO + ut2W + ut2O + finalW + finalO; // MODIFIED: Sum of all 8 components
+m.total = subjTotal;
 
-    if (m.grade === 'E') isFail = true;
+totals.ut1W += ut1W; totals.ut1O += ut1O; totals.hyW += hyW; totals.hyO += hyO;
+totals.ut2W += ut2W; totals.ut2O += ut2O; totals.finalW += finalW; totals.finalO += finalO;
+totals.overall += subjTotal;
 
-    grandTotal += m.grand_total;
-    maxTotal += maxSubjTotal;
+// Calculate max overall
+const subjConfig = SUBJECTS_NUR_TO_UKG.find(s => s.name === m.name);
+if(subjConfig) maxOverall += (subjConfig.ut1Max || 0) + (subjConfig.ut1OralMax || 0) + (subjConfig.hyMax || 0) + (subjConfig.hyOralMax || 0) 
+                             + (subjConfig.ut2Max || 0) + (subjConfig.ut2OralMax || 0) + (subjConfig.finalMax || 0) + (subjConfig.finalOralMax || 0);
 });
 
-const finalPercentage = maxTotal > 0 ? (grandTotal / maxTotal) * 100 : 0;
-const finalGrade = getGrade(finalPercentage);
-const finalResult = isFail ? 'NEEDS IMPROVEMENT' : 'PROMOTED TO NEXT CLASS';
+qs('totalUT1W').textContent = totals.ut1W;
+qs('totalUT1O').textContent = totals.ut1O;
+qs('totalHYW').textContent = totals.hyW;
+qs('totalHYO').textContent = totals.hyO;
+qs('totalUT2W').textContent = totals.ut2W;
+qs('totalUT2O').textContent = totals.ut2O;
+qs('totalFinalW').textContent = totals.finalW;
+qs('totalFinalO').textContent = totals.finalO;
+qs('totalOverall').textContent = totals.overall;
 
-// Update student object
-student.remark = finalGrade;
-student.teachersRemark = getRemarkText(finalPercentage);
+const denom = maxOverall || 1;
+percentage = denom > 0 ? ((totals.overall / denom) * 100).toFixed(2) : '0.00';
+qs('percentage').textContent = percentage + '%';
+} else if (student) {
+// classes 1-9
+let totals = { ut1:0, hy:0, ut2:0, final:0, overall:0, numericCount:0 }; // MODIFIED: New fields
+student.marks.forEach(m => {
+if (m.isGrade) {
+// skip
+} else {
+// Term 1
+const ut1 = Number(m.ut) || 0;
+const hy = Number(m.hy) || 0;
+// Term 2
+const ut2 = Number(m.ut2) || 0;
+const final = Number(m.final) || 0;
 
-// Re-render the entire table with new calculated values
-renderMarksTableForClass(student.cls);
+const t = ut1 + hy + ut2 + final; // MODIFIED: Sum of all 4 components
+m.total = t;
 
-// Update footer totals
-qs('grandTotal').textContent = grandTotal;
-qs('finalPercentage').textContent = finalPercentage.toFixed(2) + '%';
-qs('finalGrade').textContent = finalGrade;
-qs('teachersRemark').textContent = student.teachersRemark;
-qs('finalResult').textContent = `Final Result: ${finalResult}`;
+totals.ut1 += ut1; totals.hy += hy; totals.ut2 += ut2; totals.final += final; totals.overall += t; totals.numericCount++;
+}
+});
+qs('totalUT1').textContent = totals.ut1;
+qs('totalHY').textContent = totals.hy;
+qs('totalUT2').textContent = totals.ut2;
+qs('totalFinal').textContent = totals.final;
+qs('totalOverall').textContent = totals.overall;
 
-updateChart(student);
+// Denom: 20 (UT1) + 80 (HY) + 20 (UT2) + 80 (Final) = 200 per subject
+const denom = (totals.numericCount || 1) * 200; 
+percentage = denom>0?((totals.overall/denom)*100).toFixed(2):'0.00';
+qs('percentage').textContent = percentage + '%';
+} else {
+// no student: compute totals from visible inputs
+computeTotalsFromInputs();
+}
+// Remark
+if (student) {
+let remarkText = 'Needs Improvement';
+const p = Number(percentage);
+if (p >= 90) remarkText = 'Outstanding';
+else if (p >= 80) remarkText = 'Excellent';
+else if (p >= 70) remarkText = 'Very Good';
+else if (p >= 60) remarkText = 'Good';
+else if (p >= 50) remarkText = 'Average';
+student.remark = remarkText;
+student.teachersRemark = remarkText;
+qs('teachersRemark').textContent = remarkText;
+}
+// reflect row overall values
+if (student) {
+qs('marksTableBody').querySelectorAll('tr').forEach((tr, idx) => {
+const m = student.marks[idx];
+if (!m) return;
+const overallCell = tr.children[tr.children.length - 1];
+overallCell.textContent = m.isGrade ? (m.grade || '—') : (m.total || 0);
+});
+}
+// update chart
+if (student) updateChart(student);
+persistStudents();
+}
+/* compute totals when no student loaded (from visible inputs) */
+function computeTotalsFromInputs() {
+// MODIFIED: Added all new totals
+let totalUT1W = 0, totalUT1O = 0, totalHYW = 0, totalHYO = 0;
+let totalUT2W = 0, totalUT2O = 0, totalFinalW = 0, totalFinalO = 0;
+let totalOverall = 0;
+let totalUT1 = 0, totalHY = 0, totalUT2 = 0, totalFinal = 0;
+
+const cls = state.selectedClass;
+const isNurUkg = isNurToUkg(cls);
+
+qs('marksTableBody').querySelectorAll('input').forEach(el => {
+const field = el.getAttribute('data-field');
+const val = Number(el.value) || 0;
+
+if (isNurUkg) {
+    if (field === 'ut') totalUT1W += val;
+    else if (field === 'utOral') totalUT1O += val;
+    else if (field === 'hy') totalHYW += val;
+    else if (field === 'hyOral') totalHYO += val;
+    else if (field === 'ut2') totalUT2W += val;
+    else if (field === 'ut2Oral') totalUT2O += val;
+    else if (field === 'final') totalFinalW += val;
+    else if (field === 'finalOral') totalFinalO += val;
+} else {
+    // Classes 1-9
+    if (field === 'ut') totalUT1 += val; // ut = ut1
+    else if (field === 'hy') totalHY += val;
+    else if (field === 'ut2') totalUT2 += val;
+    else if (field === 'final') totalFinal += val;
+}
+});
+
+if (isNurUkg) {
+    totalOverall = totalUT1W + totalUT1O + totalHYW + totalHYO + totalUT2W + totalUT2O + totalFinalW + totalFinalO;
+    if (qs('totalUT1W')) qs('totalUT1W').textContent = totalUT1W;
+    if (qs('totalUT1O')) qs('totalUT1O').textContent = totalUT1O;
+    if (qs('totalHYW')) qs('totalHYW').textContent = totalHYW;
+    if (qs('totalHYO')) qs('totalHYO').textContent = totalHYO;
+    if (qs('totalUT2W')) qs('totalUT2W').textContent = totalUT2W;
+    if (qs('totalUT2O')) qs('totalUT2O').textContent = totalUT2O;
+    if (qs('totalFinalW')) qs('totalFinalW').textContent = totalFinalW;
+    if (qs('totalFinalO')) qs('totalFinalO').textContent = totalFinalO;
+} else {
+    totalOverall = totalUT1 + totalHY + totalUT2 + totalFinal;
+    if (qs('totalUT1')) qs('totalUT1').textContent = totalUT1;
+    if (qs('totalHY')) qs('totalHY').textContent = totalHY;
+    if (qs('totalUT2')) qs('totalUT2').textContent = totalUT2;
+    if (qs('totalFinal')) qs('totalFinal').textContent = totalFinal;
 }
 
-function getRemarkText(p) {
-    if (p >= 90) return 'Outstanding';
-    else if (p >= 80) return 'Excellent';
-    else if (p >= 70) return 'Very Good';
-    else if (p >= 60) return 'Good';
-    else if (p >= 50) return 'Average';
-    return 'Needs Improvement';
+if (qs('totalOverall')) qs('totalOverall').textContent = totalOverall;
 }
 /* ----------------- CHART ----------------- */
+// MODIFICATION 3: Define chart colors
 const CHART_COLORS = {
-    OBTAINED: 'rgba(0, 0, 0, 1)',
-    AVG: 'rgba(107, 114, 128, 1)',
-    HIGHEST: 'rgba(255, 255, 255, 1)',
-    STROKE: 'rgba(0, 0, 0, 1)'
+    OBTAINED: 'rgba(0, 0, 0, 1)', // Black
+    AVG: 'rgba(107, 114, 128, 1)', // Gray
+    HIGHEST: 'rgba(255, 255, 255, 1)', // White
+    STROKE: 'rgba(0, 0, 0, 1)' // Black stroke
 };
 
 function initChart() {
@@ -784,61 +1163,100 @@ type: 'bar',
 data: { labels: [], datasets: [] },
 options: { 
     responsive: true, 
-    plugins:{ legend: { display: true } }, 
-    scales:{ y: { beginAtZero:true, max:100 } }, // MODIFICATION: Max is now percentage
+    plugins:{ 
+        legend: { display: true } 
+    }, 
+    scales:{ 
+        y: { beginAtZero:true, max:100 } 
+    },
+    // Fixes spacing for white/black bars
     categoryPercentage: 0.9, 
     barPercentage: 0.8
 }
 });
 }
-// MODIFICATION: Chart now shows final percentage per subject
 function updateChart(student) {
+// MODIFIED: Chart now shows Annual Total marks. We must calculate the maximum possible marks for the chart scale.
 const labels = student.marks.filter(m => !m.isGrade).map(m => m.name);
-const obtained = student.marks.filter(m => !m.isGrade).map(m => m.percentage || 0);
-const classAvg = labels.map(l => getClassAverage(student.cls, l, 'percentage'));
-const classHigh = labels.map(l => getClassHighest(student.cls, l, 'percentage'));
+const obtained = student.marks.filter(m => !m.isGrade).map(m => m.total || 0);
+
+// Class Average and Highest logic is now based on Annual Total (m.total)
+const classAvg = labels.map(l => getClassAverage(student.cls, l));
+const classHigh = labels.map(l => getClassHighest(student.cls, l));
 
 state.chart.data.labels = labels;
 state.chart.data.datasets = [
-{ label: 'Obtained (%)', data: obtained, backgroundColor: CHART_COLORS.OBTAINED, borderColor: CHART_COLORS.STROKE, borderWidth: 1 },
-{ label: 'Class Avg (%)', data: classAvg, backgroundColor: CHART_COLORS.AVG, borderColor: CHART_COLORS.STROKE, borderWidth: 1 },
-{ label: 'Class High (%)', data: classHigh, backgroundColor: CHART_COLORS.HIGHEST, borderColor: CHART_COLORS.STROKE, borderWidth: 1 }
+{ 
+    label: 'Obtained', 
+    data: obtained,
+    backgroundColor: CHART_COLORS.OBTAINED,
+    borderColor: CHART_COLORS.STROKE,
+    borderWidth: 1
+},
+{ 
+    label: 'Class Average', 
+    data: classAvg,
+    backgroundColor: CHART_COLORS.AVG,
+    borderColor: CHART_COLORS.STROKE,
+    borderWidth: 1
+},
+{ 
+    label: 'Class Highest', 
+    data: classHigh,
+    backgroundColor: CHART_COLORS.HIGHEST,
+    borderColor: CHART_COLORS.STROKE,
+    borderWidth: 1
+}
 ];
+// Recalculate max y-axis for the Annual Exam total
+let maxMarks = 0;
+if (isNurToUkg(student.cls)) {
+    student.marks.filter(m => !m.isGrade).forEach(m => {
+        const subjConfig = SUBJECTS_NUR_TO_UKG.find(s => s.name === m.name);
+        if(subjConfig) maxMarks = Math.max(maxMarks, (subjConfig.ut1Max || 0) + (subjConfig.ut1OralMax || 0) + (subjConfig.hyMax || 0) + (subjConfig.hyOralMax || 0) + (subjConfig.ut2Max || 0) + (subjConfig.ut2OralMax || 0) + (subjConfig.finalMax || 0) + (subjConfig.finalOralMax || 0));
+    });
+} else {
+    maxMarks = 200; // 20 (UT1) + 80 (HY) + 20 (UT2) + 80 (Final) = 200
+}
+state.chart.options.scales.y.max = maxMarks;
+
 state.chart.update();
 }
-// MODIFICATION: Can calculate avg/high on any field (e.g., grand_total or percentage)
-function getClassAverage(cls, subjectName, field = 'grand_total') {
+function getClassAverage(cls, subjectName) {
 if (!state.studentsByClass[cls]) return 0;
 const vals = Object.values(state.studentsByClass[cls]).map(s => {
 const sub = s.marks.find(m => m.name === subjectName);
-return sub ? (sub[field] || 0) : 0;
+// Use the calculated total (Annual Total)
+return sub ? (sub.total || 0) : 0;
 }).filter(v => typeof v === 'number');
 if (!vals.length) return 0;
 return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
 }
-function getClassHighest(cls, subjectName, field = 'grand_total') {
+function getClassHighest(cls, subjectName) {
 if (!state.studentsByClass[cls]) return 0;
 const vals = Object.values(state.studentsByClass[cls]).map(s => {
 const sub = s.marks.find(m => m.name === subjectName);
-return sub ? (sub[field] || 0) : 0;
+// Use the calculated total (Annual Total)
+return sub ? (sub.total || 0) : 0;
 }).filter(v => typeof v === 'number');
 if (!vals.length) return 0;
 return Math.max(...vals);
 }
 /* ---------------- DASHBOARD TOPPER ---------------- */
 function showDashboardTopper() {
-const cls = qs('dashboardClassSelect').value;
+const cls = qs('dashboardClassSelect').value || state.selectedClass;
 if (!cls) { qs('classTopperDashboard').textContent='Class Topper: —'; qs('schoolTopperDashboard').textContent='School Topper: —'; return; }
 let classTopper = { name:'—', total:0 };
 let schoolTopper = { name:'—', total:0 };
-// MODIFICATION: Topper is based on grand_total
-Object.values(state.studentsByClass[cls]||{}).forEach(s => {
-const tot = s.marks.filter(m => !m.isGrade).reduce((a,b)=>a+(b.grand_total||0),0);
+// MODIFIED: Topper logic now uses the Annual Total (m.total is the sum of all terms)
+Object.keys(state.studentsByClass[cls]||{}).forEach(k => {
+const s = state.studentsByClass[cls][k];
+const tot = s.marks.filter(m => !m.isGrade).reduce((a,b)=>a+(b.total||0),0);
 if (tot > classTopper.total) classTopper={name:s.name,total:tot};
 });
 Object.values(state.studentsByClass).forEach(clsObj => {
 Object.values(clsObj).forEach(s => {
-const tot = s.marks.filter(m => !m.isGrade).reduce((a,b)=>a+(b.grand_total||0),0);
+const tot = s.marks.filter(m => !m.isGrade).reduce((a,b)=>a+(b.total||0),0);
 if (tot > schoolTopper.total) schoolTopper={name:s.name,total:tot};
 });
 });
@@ -847,10 +1265,54 @@ qs('schoolTopperDashboard').textContent = `School Topper: ${schoolTopper.name} �
 }
 /* ---------------- BULK DOWNLOAD ---------------- */
 function bulkDownloadReports() {
-// This function can be expanded to show the full annual report in text format
-alert("Bulk text download needs to be updated for the new Annual format. Please use the Excel download for now.");
+const cls = qs('dashboardClassSelect').value || state.selectedClass;
+if (!cls) return alert('Select a class for bulk download.');
+if (!state.studentsByClass[cls] || !Object.keys(state.studentsByClass[cls]).length) return alert('No students found in this class.');
+const arr = [];
+Object.keys(state.studentsByClass[cls]).forEach(key => {
+const s = state.studentsByClass[cls][key];
+// Added Father Name to the report
+let report = `Report Card - ${displayClassLabel(s.cls)} - ${s.name}\nAdmission No: ${s.admission}\nFather's Name: ${s.fatherName || '—'}\n\nSubjects:\n`;
+s.marks.forEach(m => {
+    if (m.isGrade) {
+        report += `${m.name}: Grade ${m.grade || '—'}\n`;
+    } else if (isNurToUkg(s.cls)) {
+        // Nur-UKG details
+        report += `${m.name}: T1(W:${m.ut||0}, O:${m.utOral||0}, HY-W:${m.hy||0}, HY-O:${m.hyOral||0}) T2(W:${m.ut2||0}, O:${m.ut2Oral||0}, Final-W:${m.final||0}, Final-O:${m.finalOral||0}) | Overall: ${m.total || 0}\n`;
+    } else {
+        // 1-9 details
+        report += `${m.name}: T1(UT1: ${m.ut || 0}, HY: ${m.hy || 0}) T2(UT2: ${m.ut2 || 0}, Final: ${m.final || 0}) | Overall: ${m.total || 0}\n`;
+    }
+});
+// Re-calculate totals and percentage correctly to ensure data accuracy for download
+const numericMarks = s.marks.filter(m=>!m.isGrade);
+const totalOverall = numericMarks.reduce((a,b)=>a+(b.total||0),0);
+const numericCount = numericMarks.length;
+let maxPossible = 0;
+if (isNurToUkg(s.cls)) {
+    s.marks.forEach(m => {
+        if(!m.isGrade) maxPossible += (m.max.ut1Max || 0) + (m.max.ut1OralMax || 0) + (m.max.hyMax || 0) + (m.max.hyOralMax || 0)
+                                    + (m.max.ut2Max || 0) + (m.max.ut2OralMax || 0) + (m.max.finalMax || 0) + (m.max.finalOralMax || 0);
+    });
+} else {
+    maxPossible = numericCount * 200; // 20 (UT1) + 80 (HY) + 20 (UT2) + 80 (Final) = 200
 }
-/* ---------------- MODIFICATION: EXCEL DOWNLOAD FOR ANNUAL EXAM ---------------- */
+
+const percentage = maxPossible > 0 ? ((totalOverall/maxPossible)*100).toFixed(2) : '0.00';
+
+report += `\nTotals: Overall ${totalOverall}\n`;
+report += `Percentage: ${percentage}%\nRemark: ${s.remark || '—'}\n\nAttendance: ${s.attendance.present || 0} / ${s.attendance.total || DEFAULT_ATT_TOTAL}\nRemark by Teacher: ${s.teachersRemark || '—'}\n\nClass Teacher:\nPrincipal:\n\n--------------------------------------------------\n\n`;
+arr.push(report);
+});
+const blob = new Blob(arr, { type: 'text/plain' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `ReportCards_${cls}_${new Date().toISOString().split('T')[0]}.txt`;
+a.click();
+URL.revokeObjectURL(url);
+}
+// MODIFICATION 1: Function to download marks as Excel (CSV)
 function downloadMarksExcel() {
     const cls = qs('dashboardClassSelect').value || state.selectedClass;
     if (!cls) return alert('Select a class for Excel download.');
@@ -858,33 +1320,122 @@ function downloadMarksExcel() {
     
     const students = Object.values(state.studentsByClass[cls]);
     const isNurUkg = isNurToUkg(cls);
-    
-    let headers = ["Adm No", "Student", "Father", "Class", "Subject", "UT1", "HY", "T1 Total", "UT2", "AE", "T2 Total", "Grand Total", "Grade"];
-    if (isNurUkg) {
-        headers = ["Adm No", "Student", "Father", "Class", "Subject", "UT1", "UT1(O)", "HY", "HY(O)", "T1 Total", "UT2", "UT2(O)", "AE", "AE(O)", "T2 Total", "Grand Total", "Grade"];
-    }
-    let csvContent = headers.join(',') + '\n';
+    const classLabel = displayClassLabel(cls);
 
-    students.forEach(s => {
-        const studentInfo = `"${s.admission}","${s.name}","${s.fatherName}","${displayClassLabel(cls)}"`;
-        s.marks.forEach(m => {
-            let row = `${studentInfo},"${m.name}"`;
-            if (m.isGrade) {
-                row += isNurUkg ? ',,,,,,,,,,,,,Grade ' + m.grade : ',,,,,,,,Grade ' + m.grade;
-            } else if (isNurUkg) {
-                row += `,${m.ut1||0},${m.ut1Oral||0},${m.hy||0},${m.hyOral||0},${m.t1_total||0},${m.ut2||0},${m.ut2Oral||0},${m.ae||0},${m.aeOral||0},${m.t2_total||0},${m.grand_total||0},${m.grade||'--'}`;
-            } else {
-                row += `,${m.ut1||0},${m.hy||0},${m.t1_total||0},${m.ut2||0},${m.ae||0},${m.t2_total||0},${m.grand_total||0},${m.grade||'--'}`;
-            }
-            csvContent += row + "\n";
-        });
+    // Ensure we have an example student to build the subject header structure
+    const studentExample = students[0];
+    if (!studentExample) return alert('No student data available to determine subject structure.');
+
+    // 1. Build Dynamic Header (One column for each mark field)
+    let subjectColumns = [];
+    const maxMarksMap = {}; // Helper to determine max for header label
+
+    studentExample.marks.forEach(m => {
+        const name = m.name;
+        
+        // Populate maxMarksMap for correct max values in header
+        if (isNurUkg) {
+            const subjConfig = SUBJECTS_NUR_TO_UKG.find(sc => sc.name === name);
+            if (subjConfig) maxMarksMap[name] = subjConfig;
+        } else {
+            maxMarksMap[name] = { utMax: 20, hyMax: 80, ut2Max: 20, finalMax: 80 };
+        }
+        
+        const max = maxMarksMap[name];
+
+        if (m.isGrade) {
+            subjectColumns.push(`"${name} Grade"`);
+        } else if (isNurUkg) {
+            subjectColumns.push(`"${name} T1 UT W (Max: ${max.ut1Max})"`);
+            if ((max.ut1OralMax || 0) > 0) subjectColumns.push(`"${name} T1 UT O (Max: ${max.ut1OralMax})"`);
+            subjectColumns.push(`"${name} T1 HY W (Max: ${max.hyMax})"`);
+            if ((max.hyOralMax || 0) > 0) subjectColumns.push(`"${name} T1 HY O (Max: ${max.hyOralMax})"`);
+            
+            subjectColumns.push(`"${name} T2 UT W (Max: ${max.ut2Max})"`);
+            if ((max.ut2OralMax || 0) > 0) subjectColumns.push(`"${name} T2 UT O (Max: ${max.ut2OralMax})"`);
+            subjectColumns.push(`"${name} T2 Final W (Max: ${max.finalMax})"`);
+            if ((max.finalOralMax || 0) > 0) subjectColumns.push(`"${name} T2 Final O (Max: ${max.finalOralMax})"`);
+            
+            subjectColumns.push(`"${name} Annual Total"`); 
+        } else { // Classes 1-9
+            subjectColumns.push(`"${name} T1 UT (Max: 20)"`);
+            subjectColumns.push(`"${name} T1 HY (Max: 80)"`);
+            subjectColumns.push(`"${name} T2 UT (Max: 20)"`);
+            subjectColumns.push(`"${name} T2 Final (Max: 80)"`);
+            subjectColumns.push(`"${name} Annual Total"`); 
+        }
     });
 
+    const coreHeader = "Admission No.,Student Name,Father Name,Class";
+    const overallHeader = "Overall Total Marks,Overall Percentage";
+    const header = `${coreHeader},${subjectColumns.join(',')},${overallHeader}\n`;
+    let csvContent = header;
+
+    // 2. Iterate and Build Single Row Data for each student
+    students.forEach(s => {
+        // Recalculate Totals and Percentage
+        let overallTotal = 0;
+        let maxPossible = 0;
+        let numericCount = 0;
+
+        s.marks.forEach(m => {
+            if (!m.isGrade) {
+                // m.total is calculated in calculateTotalsAndUpdate
+                overallTotal += m.total || 0; 
+                
+                if (isNurUkg) {
+                    const subjConfig = SUBJECTS_NUR_TO_UKG.find(sc => sc.name === m.name);
+                    if (subjConfig) maxPossible += (subjConfig.ut1Max || 0) + (subjConfig.ut1OralMax || 0) + (subjConfig.hyMax || 0) + (subjConfig.hyOralMax || 0)
+                                                + (subjConfig.ut2Max || 0) + (subjConfig.ut2OralMax || 0) + (subjConfig.finalMax || 0) + (subjConfig.finalOralMax || 0);
+                } else {
+                    numericCount++;
+                }
+            }
+        });
+        
+        if (!isNurUkg) {
+            maxPossible = numericCount * 200; // 200 per subject
+        }
+
+        const percentage = maxPossible > 0 ? ((overallTotal / maxPossible) * 100).toFixed(2) + '%' : '0.00%';
+
+        // Base student info
+        const coreInfo = `"${s.admission}","${s.name}","${s.fatherName}","${classLabel}"`;
+
+        let marksData = [];
+        s.marks.forEach(m => {
+            const max = maxMarksMap[m.name];
+            if (m.isGrade) {
+                marksData.push(`"Grade ${m.grade || '—'}"`);
+            } else if (isNurUkg) {
+                marksData.push(m.ut || 0); 
+                if ((max.ut1OralMax || 0) > 0) marksData.push(m.utOral || 0); 
+                marksData.push(m.hy || 0); 
+                if ((max.hyOralMax || 0) > 0) marksData.push(m.hyOral || 0); 
+                
+                marksData.push(m.ut2 || 0); 
+                if ((max.ut2OralMax || 0) > 0) marksData.push(m.ut2Oral || 0); 
+                marksData.push(m.final || 0); 
+                if ((max.finalOralMax || 0) > 0) marksData.push(m.finalOral || 0); 
+                
+                marksData.push(m.total || 0); 
+            } else {
+                // 1-9 numerical
+                marksData.push(m.ut || 0, m.hy || 0, m.ut2 || 0, m.final || 0, m.total || 0); 
+            }
+        });
+
+        // Combine all data for a single row
+        const row = `${coreInfo},${marksData.join(',')},${overallTotal},"${percentage}"\n`;
+        csvContent += row;
+    });
+
+    // 3. Output CSV
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Annual_Marks_Class_${cls}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `Marks_Class_${cls}_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -897,7 +1448,7 @@ if (!confirm('Are you sure? This will remove all saved data!')) return;
 localStorage.clear();
 state.studentsByClass = {};
 state.selectedStudentKey = '';
-state.reportPrintDate = null;
+state.reportPrintDate = null; // Clear print date
 qs('reportPrintDateInput').value = '';
 clearStudentView();
 updatePrintDate();
@@ -908,13 +1459,17 @@ function clearStudentView() {
 state.selectedStudentKey = '';
 qs('studentName').textContent = '—';
 qs('admissionNo').textContent = '—';
+// Clear father name display
 if (qs('fatherName')) qs('fatherName').textContent = '—';
 qs('studentNameInput').value = '';
 qs('admissionInput').value = '';
+// Clear father name input
 if (qs('fatherNameInput')) qs('fatherNameInput').value = '';
 qs('classSection').textContent = state.selectedClass ? displayClassLabel(state.selectedClass) : '—';
-qs('attendancePresent').value = '';
-qs('attendanceTotal').value = DEFAULT_ATT_TOTAL;
+// Clear *both* sets of attendance inputs
+document.querySelectorAll('#attendancePresent').forEach(el => el.value = '');
+document.querySelectorAll('#attendanceTotal').forEach(el => el.value = DEFAULT_ATT_TOTAL);
+
 qs('coscholasticBody').innerHTML = `
 <tr><td>Work Habits</td><td><input type="text" id="workHabitsInput" placeholder="e.g. A, B, C" class="border px-1 py-0.5 rounded w-full" /></td></tr>
 <tr><td>Behavior</td><td><input type="text" id="behaviorInput" placeholder="e.g. A, B, C" class="border px-1 py-0.5 rounded w-full"/></td></tr>
@@ -925,9 +1480,14 @@ renderMarksTableForClass(state.selectedClass);
 
 /* ----------------- UPDATE PRINT DATE ----------------- */
 function updatePrintDate() {
-    let dateToDisplay = state.reportPrintDate 
-        ? new Date(state.reportPrintDate).toLocaleDateString('en-IN')
-        : new Date().toLocaleDateString('en-IN');
+    let dateToDisplay;
+    if (state.reportPrintDate) {
+        // Format the stored date (YYYY-MM-DD) to a locale string (DD/MM/YYYY)
+        dateToDisplay = new Date(state.reportPrintDate).toLocaleDateString('en-IN');
+    } else {
+        // Use the current date as a fallback if nothing is stored/set
+        dateToDisplay = new Date().toLocaleDateString('en-IN');
+    }
     qs('printDate').textContent = 'Date: ' + dateToDisplay;
 }
 
@@ -936,18 +1496,24 @@ function setReportPrintDate() {
     if (dateInput) {
         state.reportPrintDate = dateInput;
         localStorage.setItem('ng_reportPrintDate', dateInput);
+        updatePrintDate();
         alert('Report print date set successfully!');
     } else {
         state.reportPrintDate = null;
         localStorage.removeItem('ng_reportPrintDate');
+        updatePrintDate();
         alert('Report print date cleared. Current date will be used.');
     }
-    updatePrintDate();
 }
 
+
+/* ----------------- INIT CALL ----------------- */
 init(); 
 
+/* ----------------- Extra: loadStudent helper when existing saved student selected via add/load ---------------- */
+(function wireLoadFromSaved() {
+// When page loads, nothing auto-loads. Users use Load/Add buttons.
+})();
 </script>
 </body>
 </html>
-
