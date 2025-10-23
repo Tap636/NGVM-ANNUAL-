@@ -35,14 +35,15 @@ content: "";
 position: absolute; 
 top: 50%;
 left: 50%;
-transform: translate(-50%, -50%);
-width: 60%;
-height: 60%;
-background-image: url('watermark.png'); 
+transform: translate(-50%, -50%) rotate(-45deg); /* Added rotation for standard watermark effect */
+width: 100%; /* Increased width to cover the page */
+height: 100%;
+/* MODIFIED: Replaced external image with a data URI for a text-based DRAFT watermark */
+background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='40' font-family='sans-serif' fill='rgba(0,0,0,0.8)'%3EDRAFT%3C/text%3E%3C/svg%3E");
 background-repeat: no-repeat;
 background-position: center;
-background-size: contain;
-opacity: 0.05; /* MODIFICATION: Reduced opacity */
+background-size: 50%; /* Adjusted size */
+opacity: 0.08; /* MODIFICATION: Increased opacity slightly for visibility against background */
 pointer-events: none;
 z-index: 0;
 }
@@ -246,7 +247,7 @@ select.grade-select { padding:4px; border-radius:4px; }
 <div class="main-content">
 <div class="no-print mb-4 p-4 bg-yellow-100 border rounded">
 <h2 class="font-bold mb-2">School Dashboard (Topper Analysis)</h2>
-<label class="block text-sm text-gray-600 mb-1">Select Class to See Topper:</label>
+<label class="block text-sm text-gray-600 mb-1">Select Class to See Topper / Import Data:</label>
 <select id="dashboardClassSelect" class="border rounded px-2 py-1 mb-2">
 <option value="">-- Select Class --</option>
 <option value="Nursery">Nursery</option>
@@ -264,9 +265,11 @@ select.grade-select { padding:4px; border-radius:4px; }
 </select>
 <p id="classTopperDashboard" class="font-semibold mt-1">Class Topper: —</p>
 <p id="schoolTopperDashboard" class="font-semibold mt-1">School Topper: —</p>
-<div class="mt-3 flex gap-2">
+<div class="mt-3 flex gap-2 flex-wrap items-center">
 <button id="bulkDownloadBtn" class="px-3 py-1 bg-indigo-600 text-white rounded">Download Classwise Report Cards</button>
 <button id="downloadExcelBtn" class="px-3 py-1 bg-green-700 text-white rounded">Download Classwise Marks (Excel)</button>
+<button id="importCsvBtn" class="px-3 py-1 bg-purple-600 text-white rounded" onclick="document.getElementById('csvFileInput').click()">Import Students (CSV)</button>
+<input type="file" id="csvFileInput" class="hidden" accept=".csv" />
 <button id="setNewLoginPassBtn" class="px-3 py-1 bg-yellow-600 text-white rounded">Set New Login Password</button>
 </div>
 </div>
@@ -618,6 +621,9 @@ qs('setPrintDateBtn').addEventListener('click', setReportPrintDate);
 
 // ADDED: Attach Set New Login Password event listener
 qs('setNewLoginPassBtn').addEventListener('click', changeLoginPassword);
+
+// ADDED: Attach CSV Import event listener
+qs('csvFileInput').addEventListener('change', handleImportCSV);
 
 qs('clearDataBtn').addEventListener('click', clearAllData);
 }
@@ -1440,10 +1446,107 @@ function downloadMarksExcel() {
     URL.revokeObjectURL(url);
 }
 
+/* ---------------- CSV IMPORT FUNCTION (NEW) ---------------- */
+
+function handleImportCSV(event) {
+    const cls = qs('dashboardClassSelect').value;
+    if (!cls) {
+        alert('Please select a Class in the Dashboard section before importing.');
+        event.target.value = ''; // Clear file input
+        return;
+    }
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        try {
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            if (lines.length < 1) {
+                alert('CSV file is empty or invalid.');
+                return;
+            }
+
+            // Simple CSV parser: split by comma, allowing for quotes to enclose fields
+            const parseCSVLine = (line) => {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                result.push(current.trim());
+                return result.map(s => s.replace(/^"|"$/g, '').trim()); // Clean up quotes
+            };
+
+            const header = parseCSVLine(lines[0]);
+            const admissionIndex = header.findIndex(h => h.toLowerCase().includes('admission no'));
+            const nameIndex = header.findIndex(h => h.toLowerCase().includes('student name'));
+            const fatherIndex = header.findIndex(h => h.toLowerCase().includes('father name'));
+
+            if (admissionIndex === -1 || nameIndex === -1 || fatherIndex === -1) {
+                alert('CSV header must contain "Admission No.", "Student Name", and "Father Name".');
+                return;
+            }
+
+            let studentsImported = 0;
+            const currentClassData = state.studentsByClass[cls] || {};
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length > 1) {
+                    const admission = values[admissionIndex];
+                    const name = values[nameIndex];
+                    const fatherName = values[fatherIndex];
+
+                    if (admission && name) {
+                        const key = `${cls}|${admission}`;
+                        
+                        // Create a new empty student data structure for the selected class
+                        const newStudent = makeEmptyStudent(name, admission, cls, fatherName);
+                        
+                        if (currentClassData[key]) {
+                            // Student exists, preserve existing marks/attendance but update names
+                            const existing = currentClassData[key];
+                            newStudent.marks = existing.marks;
+                            newStudent.attendance = existing.attendance;
+                            newStudent.coscholastic = existing.coscholastic;
+                            newStudent.teachersRemark = existing.teachersRemark;
+                        }
+                        
+                        currentClassData[key] = newStudent;
+                        studentsImported++;
+                    }
+                }
+            }
+
+            state.studentsByClass[cls] = currentClassData;
+            persistStudents();
+            alert(`Successfully imported ${studentsImported} students into Class ${displayClassLabel(cls)}. Marks fields are now available for manual entry.`);
+            // Clear the file input to allow re-importing the same file
+            event.target.value = ''; 
+        } catch (error) {
+            console.error('CSV Import Error:', error);
+            alert('An error occurred during file parsing. Please ensure the file is a valid CSV.');
+        }
+    };
+    reader.readAsText(file);
+}
+
 /* ---------------- CLEAR DATA ---------------- */
 function clearAllData() {
 const password = prompt('Enter password to clear ALL data:');
-if (password !== '1234') return alert('Incorrect password!');
+if (password !== ADMIN_PASSWORD) return alert('Incorrect password!'); // Use Admin Password for this sensitive action
 if (!confirm('Are you sure? This will remove all saved data!')) return;
 localStorage.clear();
 state.studentsByClass = {};
